@@ -52,6 +52,7 @@ extension View {
 
 #else
 import UIKit
+import AVFoundation
 public typealias View = UIView
 
 extension View {
@@ -61,7 +62,30 @@ extension View {
     }
     
     func fb_makeViewSnapshot() -> Image? {
-      UIGraphicsImageRenderer(size: bounds.size).image { _ in
+
+      // Check if we have an a view that includes an AVPlayerLayer.
+      // If we do, we want to basically create a new view, insert it into the view with a captured frame.
+
+      if let playerView = subviews.first(where: { $0.layer is AVPlayerLayer }),
+         let avLayer = playerView.layer as? AVPlayerLayer,
+         let player = avLayer.player,
+         let asset = player.currentItem?.asset {
+        let imageView = UIImageView(frame: playerView.frame)
+
+        let imageGenerator = AVAssetImageGenerator(asset: asset)
+        imageGenerator.requestedTimeToleranceBefore = .zero
+        imageGenerator.requestedTimeToleranceAfter = .zero
+
+        guard
+          let thumb = try? imageGenerator.copyCGImage(
+            at: player.currentTime(),
+            actualTime: nil) else { return nil }
+        let image = UIImage(cgImage: thumb)
+        imageView.image = image
+        addSubview(imageView)
+      }
+
+      return UIGraphicsImageRenderer(size: bounds.size).image { _ in
         drawHierarchy(in: bounds, afterScreenUpdates: true)
       }
     }
