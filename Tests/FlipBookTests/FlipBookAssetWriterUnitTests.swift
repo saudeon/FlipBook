@@ -206,11 +206,11 @@ final class FlipBookAssetWriterUnitTests: XCTestCase {
         let flipBookAssetWriter = FlipBookAssetWriter()
         let urlString = flipBookAssetWriter.makeFileOutputURL()?.absoluteString
         XCTAssertEqual(urlString?.contains("FlipBook.mov"), true)
-        XCTAssertEqual(urlString?.contains("Caches"), true)
-        
+        XCTAssertEqual(urlString?.contains("Documents"), true)
+
         let urlString1 = flipBookAssetWriter.makeFileOutputURL(fileName: "myGreat.gif")?.absoluteString
         XCTAssertEqual(urlString1?.contains("myGreat.gif"), true)
-        XCTAssertEqual(urlString1?.contains("Caches"), true)
+        XCTAssertEqual(urlString1?.contains("Documents"), true)
     }
     
     func testMakeWriter() {

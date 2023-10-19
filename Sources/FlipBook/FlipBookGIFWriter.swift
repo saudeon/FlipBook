@@ -28,6 +28,9 @@ public final class FlipBookGIFWriter: NSObject {
         
         /// Failed to finalize writing for gif
         case failedToFinalizeDestination
+
+        /// Could not create CFURL
+        case couldNotCreateUrl
     }
     
     // MARK: - Public Properties -
@@ -61,44 +64,49 @@ public final class FlipBookGIFWriter: NSObject {
     ///   - sizeRatio: scale that image should be resized to when making gif **Default** 1.0
     ///   - progress: closure called when progress is made while creating gif. Called from background thread.
     ///   - completion: closure called after gif has been composed. Called from background thread.
-    public func makeGIF(_ images: [Image], delay: CGFloat = 0.02, loop: Int = 0, sizeRatio: Float = 1.0, progress: ((CGFloat) -> Void)?, completion: @escaping (Result<URL, Error>) -> Void) {
-        var images: [Image?] = images
-        let count = images.count
-        Self.queue.async { [weak self] in
-            autoreleasepool {
-                guard let self = self else { return }
-                let gifSettings = [
-                    kCGImagePropertyGIFDictionary as String: [kCGImagePropertyGIFLoopCount as String: loop,
-                                                              kCGImagePropertyGIFHasGlobalColorMap as String: false]
-                ]
-                let imageSettings = [
-                    kCGImagePropertyGIFDictionary as String: [kCGImagePropertyGIFDelayTime as String: delay]
-                ]
-                guard let destination = CGImageDestinationCreateWithURL(self.fileOutputURL as CFURL, kUTTypeGIF, count, nil) else {
-                    completion(.failure(FlipBookGIFWriterError.couldNotCreateDestination))
-                    return
-                }
-                
-                CGImageDestinationSetProperties(destination, gifSettings as CFDictionary)
-                for index in images.indices {
-                    autoreleasepool {
-                        let image = images[index]
-                        if let cgImage = image?.cgI?.resize(with: sizeRatio) {
-                            CGImageDestinationAddImage(destination, cgImage, imageSettings as CFDictionary)
-                        }
-                        images[index] = nil
-                        progress?(CGFloat(index + 1) / CGFloat(count))
-                    }
-                }
-                
-                if CGImageDestinationFinalize(destination) == false {
-                    completion(.failure(FlipBookGIFWriterError.couldNotCreateDestination))
-                } else {
-                    completion(.success(self.fileOutputURL))
-                }
-            }
+  public func makeGIF(_ images: [Image], delay: CGFloat = 0.02, loop: Int = 0, sizeRatio: Float = 1.0, progress: ((CGFloat) -> Void)?, completion: @escaping (Result<URL, Error>) -> Void) {
+    var images: [Image?] = images
+    let count = images.count
+    Self.queue.async { [weak self] in
+      guard let self = self else { return }
+
+      let gifSettings = [
+        kCGImagePropertyGIFDictionary as String: [kCGImagePropertyGIFLoopCount as String: loop,
+                                                  kCGImagePropertyGIFHasGlobalColorMap as String: false]
+      ]
+
+      let imageSettings = [
+        kCGImagePropertyGIFDictionary as String: [kCGImagePropertyGIFDelayTime as String: delay]
+      ]
+
+      if let url = self.fileOutputURL as CFURL? {
+        guard let destination = CGImageDestinationCreateWithURL(url, kUTTypeGIF, count, nil) else {
+          completion(.failure(FlipBookGIFWriterError.couldNotCreateDestination))
+          return
         }
+
+        CGImageDestinationSetProperties(destination, gifSettings as CFDictionary)
+        for index in images.indices {
+          let image = images[index]
+          if let cgImage = image?.cgI?.resize(with: sizeRatio) {
+            CGImageDestinationAddImage(destination, cgImage, imageSettings as CFDictionary)
+          }
+          images[index] = nil
+          progress?(CGFloat(index + 1) / CGFloat(count))
+        }
+
+        if (!CGImageDestinationFinalize(destination)) {
+          completion(.failure(FlipBookGIFWriterError.failedToFinalizeDestination))
+          return
+        }
+
+        completion(.success(self.fileOutputURL))
+      } else {
+        completion(.failure(FlipBookGIFWriterError.couldNotCreateUrl))
+      }
     }
+
+  }
     
     /// Determines the frame rate of a gif by looking at the `delay` of the first image
     /// - Parameter gifURL: The file `URL` where the gif is located.
