@@ -128,13 +128,13 @@ public final class FlipBookCoreAnimationVideoEditor: NSObject {
             return
         }
           
-        guard let exportURL = FlipBookAssetWriter().makeFileOutputURL(fileName: "FlipBookVideoComposition.mov") else {
+        guard let exportURL = FlipBookAssetWriter().makeFileOutputURL(fileName: "FlipBookVideoComposition.mp4") else {
             DispatchQueue.main.async { completion(.failure(FlipBookCoreAnimationVideoEditorError.couldNotCreateOutputURL)) }
             return
         }
           
         export.videoComposition = videoComposition
-        export.outputFileType = .mov
+        export.outputFileType = .mp4
         export.outputURL = exportURL
         
         if let progress = progress {

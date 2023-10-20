@@ -190,7 +190,7 @@ public final class FlipBookLivePhotoWriter: NSObject {
     do {
 
       // Create the Asset Writer
-      assetWriter = try AVAssetWriter(outputURL: destination, fileType: .mov)
+      assetWriter = try AVAssetWriter(outputURL: destination, fileType: .mp4)
 
       // Create Video Reader Output
       videoReader = try AVAssetReader(asset: videoAsset)

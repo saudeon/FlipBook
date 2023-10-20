@@ -205,7 +205,7 @@ final class FlipBookAssetWriterUnitTests: XCTestCase {
     func testMakeFileOutputURL() {
         let flipBookAssetWriter = FlipBookAssetWriter()
         let urlString = flipBookAssetWriter.makeFileOutputURL()?.absoluteString
-        XCTAssertEqual(urlString?.contains("FlipBook.mov"), true)
+        XCTAssertEqual(urlString?.contains("FlipBook.mp4"), true)
         XCTAssertEqual(urlString?.contains("Documents"), true)
 
         let urlString1 = flipBookAssetWriter.makeFileOutputURL(fileName: "myGreat.gif")?.absoluteString

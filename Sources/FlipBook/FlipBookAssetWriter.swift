@@ -67,7 +67,7 @@ public final class FlipBookAssetWriter: NSObject {
   /// Enum that represents the different types of assets that can be created
   public enum AssetType: Equatable {
     
-    /// `AssetType` that represents a conversion to an `.mov` video
+    /// `AssetType` that represents a conversion to an `.mp4` video
     case video
     
     /// `AssetType` that represents a conversion to a Live Photo with an optional image that represents the still image of the Live Photo if associated type is `nil` the first frame is used
@@ -121,7 +121,7 @@ public final class FlipBookAssetWriter: NSObject {
   public var preferredFramesPerSecond: Int = 60
   
   /// The URL for where the video is written
-  /// **Default** is `"FlipBook.mov` in caches directory
+  /// **Default** is `"FlipBook.mp4` in caches directory
   public lazy var fileOutputURL: URL? = self.makeFileOutputURL()
   
   /// The `Date` for when the recording started
@@ -582,7 +582,7 @@ public final class FlipBookAssetWriter: NSObject {
   // MARK: - Internal Methods -
   
   /// Function that returns the default file url for the generated video
-  internal func makeFileOutputURL(fileName: String = "FlipBook.mov") -> URL? {
+  internal func makeFileOutputURL(fileName: String = "FlipBook.mp4") -> URL? {
     do {
       let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
       var directory = paths[0].appendingPathComponent(fileName)
@@ -601,7 +601,7 @@ public final class FlipBookAssetWriter: NSObject {
     guard let fileURL = self.fileOutputURL else {
       throw FlipBookAssetWriterError.couldNotWriteAsset
     }
-    let writer = try AVAssetWriter(url: fileURL, fileType: .mov)
+    let writer = try AVAssetWriter(url: fileURL, fileType: .mp4)
 #if !os(macOS)
     let settings: [String : Any] = [
       AVVideoCodecKey: AVVideoCodecType.h264,

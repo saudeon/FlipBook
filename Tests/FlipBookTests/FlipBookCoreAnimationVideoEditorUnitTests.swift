@@ -106,7 +106,7 @@ final class FlipBookCoreAnimationVideoEditorUnitTests: XCTestCase {
         }
         let asset = AVURLAsset(url: url)
         XCTAssertEqual(url.absoluteString.contains("Caches"), true)
-        XCTAssertEqual(url.absoluteString.contains("FlipBookVideoComposition.mov"), true)
+        XCTAssertEqual(url.absoluteString.contains("FlipBookVideoComposition.mp4"), true)
         XCTAssertEqual(animationCallCount, 1)
         XCTAssertEqual(progress > 0.0, true)
         XCTAssertEqual(asset.tracks(withMediaType: .video).first != nil, true)
