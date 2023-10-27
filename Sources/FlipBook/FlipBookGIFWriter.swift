@@ -68,41 +68,46 @@ public final class FlipBookGIFWriter: NSObject {
     var images: [Image?] = images
     let count = images.count
     Self.queue.async { [weak self] in
-      guard let self = self else { return }
+      autoreleasepool {
 
-      let gifSettings = [
-        kCGImagePropertyGIFDictionary as String: [kCGImagePropertyGIFLoopCount as String: loop,
-                                                  kCGImagePropertyGIFHasGlobalColorMap as String: false]
-      ]
+        guard let self = self else { return }
 
-      let imageSettings = [
-        kCGImagePropertyGIFDictionary as String: [kCGImagePropertyGIFDelayTime as String: delay]
-      ]
+        let gifSettings = [
+          kCGImagePropertyGIFDictionary as String: [kCGImagePropertyGIFLoopCount as String: loop,
+                                                    kCGImagePropertyGIFHasGlobalColorMap as String: false]
+        ]
 
-      if let url = self.fileOutputURL as CFURL? {
-        guard let destination = CGImageDestinationCreateWithURL(url, kUTTypeGIF, count, nil) else {
-          completion(.failure(FlipBookGIFWriterError.couldNotCreateDestination))
-          return
-        }
+        let imageSettings = [
+          kCGImagePropertyGIFDictionary as String: [kCGImagePropertyGIFDelayTime as String: delay]
+        ]
 
-        CGImageDestinationSetProperties(destination, gifSettings as CFDictionary)
-        for index in images.indices {
-          let image = images[index]
-          if let cgImage = image?.cgI?.resize(with: sizeRatio) {
-            CGImageDestinationAddImage(destination, cgImage, imageSettings as CFDictionary)
+        if let url = self.fileOutputURL as CFURL? {
+          guard let destination = CGImageDestinationCreateWithURL(url, kUTTypeGIF, count, nil) else {
+            completion(.failure(FlipBookGIFWriterError.couldNotCreateDestination))
+            return
           }
-          images[index] = nil
-          progress?(CGFloat(index + 1) / CGFloat(count))
-        }
 
-        if (!CGImageDestinationFinalize(destination)) {
-          completion(.failure(FlipBookGIFWriterError.failedToFinalizeDestination))
-          return
-        }
+          CGImageDestinationSetProperties(destination, gifSettings as CFDictionary)
+          for index in images.indices {
+            autoreleasepool {
+              let image = images[index]
+              if let cgImage = image?.cgI?.resize(with: sizeRatio) {
+                CGImageDestinationAddImage(destination, cgImage, imageSettings as CFDictionary)
+              }
+              images[index] = nil
+              progress?(CGFloat(index + 1) / CGFloat(count))
+            }
+          }
 
-        completion(.success(self.fileOutputURL))
-      } else {
-        completion(.failure(FlipBookGIFWriterError.couldNotCreateUrl))
+          if (!CGImageDestinationFinalize(destination)) {
+            completion(.failure(FlipBookGIFWriterError.failedToFinalizeDestination))
+            return
+          }
+
+          completion(.success(self.fileOutputURL))
+        } else {
+          completion(.failure(FlipBookGIFWriterError.couldNotCreateUrl))
+        }
       }
     }
 

@@ -146,8 +146,8 @@ public final class FlipBookAssetWriter: NSObject {
   internal var frames = [Image?]()
   
   /// The queue on which video asset writing is done
-  internal let queue = DispatchQueue(label: "com.FlipBook.asset.writer.queue")
-  
+  internal let queue = DispatchQueue(label: "com.FlipBook.asset.writer.queue", qos: .background)
+
   /// The video writer input for the asset writer
   internal var videoInput: AVAssetWriterInput?
   
