@@ -122,8 +122,8 @@ public final class FlipBookAssetWriter: NSObject {
   
   /// The URL for where the video is written
   /// **Default** is `"FlipBook.mp4` in caches directory
-  public lazy var fileOutputURL: URL? = self.makeFileOutputURL()
-  
+  public lazy var fileOutputURL: URL? = self.makeFileOutputURL(fileName: "\(assetFileName).mp4")
+
   /// The `Date` for when the recording started
   public var startDate: Date?
   
@@ -134,7 +134,14 @@ public final class FlipBookAssetWriter: NSObject {
   public var gifImageScale: Float = 0.5
   
   // MARK: - Internal Properties -
-  
+
+  internal init(_ fileName: String = "FlipBook") {
+    self.assetFileName = fileName
+    super.init()
+  }
+
+  internal var assetFileName: String
+
   /// The images that compose the frames of the final video
   internal var frames = [Image?]()
   
@@ -148,8 +155,8 @@ public final class FlipBookAssetWriter: NSObject {
   internal var adapter: AVAssetWriterInputPixelBufferAdaptor?
   
   /// The writer used for making gifs
-  internal lazy var gifWriter = FlipBookGIFWriter(fileOutputURL: self.makeFileOutputURL(fileName: "FlipBook.gif"))
-  
+  internal lazy var gifWriter = FlipBookGIFWriter(fileOutputURL: self.makeFileOutputURL(fileName: "\(assetFileName).gif"))
+
   /// The writer used for making Live Photos
   internal lazy var livePhotoWriter = FlipBookLivePhotoWriter()
   
@@ -585,7 +592,7 @@ public final class FlipBookAssetWriter: NSObject {
   internal func makeFileOutputURL(fileName: String = "FlipBook.mp4") -> URL? {
     do {
       let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-      var directory = paths[0].appendingPathComponent(fileName)
+      let directory = paths[0].appendingPathComponent(fileName)
       if FileManager.default.fileExists(atPath: directory.path) {
         try FileManager.default.removeItem(atPath: directory.path)
       }
@@ -702,16 +709,7 @@ public final class FlipBookAssetWriter: NSObject {
   
   /// Helper function that calculates the frame rate if `startDate` and `endDate` are set. Otherwise it returns `preferredFramesPerSecond`
   internal func makeFrameRate() -> Int {
-    let startTimeDiff = startDate?.timeIntervalSinceNow ?? 0
-    let endTimeDiff = endDate?.timeIntervalSinceNow ?? 0
-    let diff = endTimeDiff - startTimeDiff
-    let frameRate: Int
-    if diff != 0 {
-      frameRate = Int(Double(frames.count) / diff + 0.5)
-    } else {
-      frameRate = preferredFramesPerSecond
-    }
-    return frameRate
+    preferredFramesPerSecond
   }
 }
 

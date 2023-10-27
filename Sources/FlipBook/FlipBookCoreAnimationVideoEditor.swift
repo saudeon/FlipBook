@@ -136,7 +136,8 @@ public final class FlipBookCoreAnimationVideoEditor: NSObject {
         export.videoComposition = videoComposition
         export.outputFileType = .mp4
         export.outputURL = exportURL
-        
+        export.shouldOptimizeForNetworkUse = true
+
         if let progress = progress {
             source = DispatchSource.makeTimerSource(queue: DispatchQueue.main)
             source?.schedule(deadline: .now(), repeating: 1.0 / Double(self.preferredFramesPerSecond))

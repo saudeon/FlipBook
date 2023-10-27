@@ -42,7 +42,10 @@ public final class FlipBook: NSObject {
     /// The asset type to be created
     /// **Default** `.video`
     public var assetType: FlipBookAssetWriter.AssetType = .video
-    
+
+    /// The asset file name
+    public var assetFileName: String = "Flipbook"
+
     /// Boolean that when set to `true` will cause the entire screen to be captured using `ReplayKit` on iOS 11.0+ only and will otherwise be ignored
     public var shouldUseReplayKit: Bool = false
     
@@ -56,12 +59,17 @@ public final class FlipBook: NSObject {
         return recorder
     }()
     #endif
-    
+
+    public init(_ fileName: String) {
+      self.assetFileName = fileName
+      super.init()
+    }
+
     // MARK: - Internal Properties -
 
     /// Asset writer used to convert screenshots into video
-    internal let writer = FlipBookAssetWriter()
-    
+    internal lazy var writer = FlipBookAssetWriter(assetFileName)
+
     /// Closure to be called when the asset writing has progressed
     internal var onProgress: ((CGFloat) -> Void)?
     
